@@ -69,7 +69,9 @@
 
 %>
 <div>
-    <a class="back-button" href="shop.jsp">Back to Shop</a>
+    <form action="<%= request.getContextPath() %>/loadshop" method="post" style="display: inline;">
+        <input type="submit" value="Back to shop" class="back-button">
+    </form>
     <form action="<%= request.getContextPath() %>/products" method="post" style="display: inline;">
         <input type="submit" value="List of Products" class="back-button">
     </form>

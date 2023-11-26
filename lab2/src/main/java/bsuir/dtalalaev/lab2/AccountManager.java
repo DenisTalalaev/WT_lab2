@@ -103,7 +103,7 @@ public class AccountManager {
         servlet.getServletContext().getRequestDispatcher("/cart.jsp").forward(req, resp);
     }
 
-    private static void loadShop(HelloServlet servlet, HttpServletResponse resp, HttpServletRequest req) throws SQLException, ServletException, IOException {
+    public static void loadShop(HelloServlet servlet, HttpServletResponse resp, HttpServletRequest req) throws SQLException, ServletException, IOException {
         List<Product> products = DataBase.getAllProducts();
         req.getSession().setAttribute("products", products);
         servlet.getServletContext().getRequestDispatcher("/shop.jsp").forward(req, resp);

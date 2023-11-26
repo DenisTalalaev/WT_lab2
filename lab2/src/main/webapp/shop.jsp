@@ -85,6 +85,34 @@
         .add-to-cart-form:hover {
             background-color: #45a049;
         }
+        .button-container form button {
+            background-color: #555; /* Button color */
+            color: #fff; /* Text color */
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .button-container form button:hover {
+            background-color: #333; /* Button color on hover */
+        }
+
+        /* Style for the Cart button */
+        .button-container form[action="loadUserCart"] button {
+            background-color: #4CAF50; /* Cart button color */
+        }
+
+        /* Style for the Logout button */
+        .button-container form[action="logout"] button {
+            background-color: #f44336; /* Logout button color */
+        }
+
+        /* Style for the AdminPanel button */
+        .button-container form[action="adminpanel"] button {
+            background-color: #2196F3; /* AdminPanel button color */
+        }
     </style>
 </head>
 <body>
