@@ -1,4 +1,4 @@
-package bsuir.dtalalaev.lab2;
+package bsuir.dtalalaev.lab2.locale;
 
 public class LanguageFabric {
     public static Language parseLanguage(String lang){

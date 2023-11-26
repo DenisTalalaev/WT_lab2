@@ -1,13 +1,25 @@
 package bsuir.dtalalaev.lab2;
 
+import bsuir.dtalalaev.lab2.dbcontrollers.DataBase;
+import bsuir.dtalalaev.lab2.entities.Product;
 import bsuir.dtalalaev.lab2.entities.User;
+import bsuir.dtalalaev.lab2.locale.LanguageFabric;
+import bsuir.dtalalaev.lab2.locale.MessageManager;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 public class AdminController {
     public static void loadAdminPanel(HelloServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
@@ -19,26 +31,6 @@ public class AdminController {
             req.getSession().setAttribute(MessageManager.EXCEPTION, MessageManager.getGetUserListException(LanguageFabric.parseLanguage(CookieManager.getLangFromCookie(req))));
         } catch (ServletException | IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public static void blockUser(HelloServlet helloServlet, HttpServletRequest req, HttpServletResponse resp, int userId) throws IOException, SQLException {
-        if(DataBase.isBlocked(userId)){
-            DataBase.unbanUser(userId);
-            System.out.println("Unban");
-        } else{
-            System.out.println("ban");
-            DataBase.banUser(userId);
-        }
-    }
-
-    public static void promoteUser(HelloServlet helloServlet, HttpServletRequest req, HttpServletResponse resp, int userId) throws IOException, SQLException {
-        if(DataBase.isAdmin(userId)){
-            System.out.println("demote");
-            DataBase.demoteAdmin(userId);
-        } else {
-            DataBase.promoteAdmin(userId);
-            System.out.println("promote");
         }
     }
 
@@ -96,5 +88,57 @@ public class AdminController {
         } else {
             AccountManager.logout(helloServlet, req, resp);
         }
+    }
+
+    public static void loadProductsPage(HelloServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            List<Product> productList = DataBase.getAllProducts();
+            req.getSession().setAttribute("products", productList);
+            servlet.getServletContext().getRequestDispatcher("/products.jsp").forward(req, resp);
+        } catch (SQLException e) {
+            req.getSession().setAttribute(MessageManager.EXCEPTION, MessageManager.getGetProductListException(LanguageFabric.parseLanguage(CookieManager.getLangFromCookie(req))));
+        } catch (ServletException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void addProduct(HelloServlet helloServlet, HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
+        String productName = request.getParameter("productName");
+        String productDescription = request.getParameter("productDescription");
+        double productPrice = Double.parseDouble(request.getParameter("productPrice"));
+        int productCount = Integer.parseInt(request.getParameter("productCount"));
+
+        Part filePart = request.getPart("productImage");
+        InputStream fileContent = filePart.getInputStream();
+
+        // Отключаем автоматичесное закрытие InputStream после копирования
+        // (чтобы избежать "java.io.IOException: Stream Closed")
+        try {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nRead;
+            byte[] data = new byte[16384];
+
+            while ((nRead = fileContent.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+
+            buffer.flush();
+
+            byte[] imageBytes = buffer.toByteArray();
+
+            Product newProduct = new Product(0, productName, productDescription, productPrice, imageBytes, productCount);
+            DataBase.addProduct(newProduct);
+            AdminController.loadProductsPage(helloServlet, request, response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public static void deleteProduct(HelloServlet helloServlet, HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException {
+        DataBase.deleteProduct(Integer.parseInt(req.getParameter("productId")));
+        AdminController.loadProductsPage(helloServlet, req, resp);
     }
 }

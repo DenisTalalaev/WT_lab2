@@ -1,6 +1,6 @@
-package bsuir.dtalalaev.lab2;
+package bsuir.dtalalaev.lab2.dbcontrollers;
 
-import bsuir.dtalalaev.lab2.entities.ConnectionPool;
+import bsuir.dtalalaev.lab2.entities.Product;
 import bsuir.dtalalaev.lab2.entities.User;
 
 import java.sql.*;
@@ -9,9 +9,10 @@ import java.util.List;
 
 public class DataBase {
 
+    private static final String GET_ALL_PRODUCTS_QUERY = "SELECT * FROM product";
     private static final String ADD_USER_QUERY = "INSERT INTO user (u_name, u_login, u_pass_hash, u_is_admin, u_is_blocked) VALUES (?, ?, ?, ?, ?)";
     private static final String DELETE_USER_QUERY = "DELETE FROM user WHERE u_id = ?";
-    private static final String ADD_PRODUCT_QUERY = "INSERT INTO product (p_name, p_description, p_price, p_image_url, p_count) VALUES (?, ?, ?, ?, ?)";
+    private static final String ADD_PRODUCT_QUERY = "INSERT INTO product (p_name, p_description, p_price, p_image, p_count) VALUES (?, ?, ?, ?, ?)";
     private static final String DELETE_PRODUCT_QUERY = "DELETE FROM product WHERE p_id = ?";
     private static final String UPDATE_USER_STATUS_QUERY = "UPDATE user SET u_is_admin = ?, u_is_blocked = ? WHERE u_id = ?";
     private static final String ADD_BUCKET_QUERY = "INSERT INTO bucket (p_id, p_col, p_adding_date) VALUES (?, ?, ?)";
@@ -22,6 +23,36 @@ public class DataBase {
     private static final String GET_ALL_USERS_QUERY = "SELECT * FROM user";
     private static final String IS_BLOCKED_QUERY = "SELECT u_is_blocked FROM user WHERE u_id = ?";
     private static final String GET_USER_ID_BY_LOGIN_AND_PASSWORD_QUERY = "SELECT u_id FROM user WHERE u_login = ? AND u_pass_hash = ?";
+
+    public static List<Product> getAllProducts() throws SQLException {
+        List<Product> productList = new ArrayList<>();
+        Connection connection = null;
+        try {
+            connection = ConnectionPool.getInstance().getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL_PRODUCTS_QUERY);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    int productId = resultSet.getInt("p_id");
+                    String productName = resultSet.getString("p_name");
+                    String productDescription = resultSet.getString("p_description");
+                    double productPrice = resultSet.getDouble("p_price");
+                    byte[] productImage = resultSet.getBytes("p_image");
+                    int productCount = resultSet.getInt("p_count");
+
+                    Product product = new Product(productId, productName, productDescription,
+                            productPrice, productImage, productCount);
+                    productList.add(product);
+                }
+            }
+        } finally {
+            if (connection != null) {
+                ConnectionPool.getInstance().releaseConnection(connection);
+            }
+        }
+        return productList;
+    }
+
 
     public static void addUser(String userName, String login, String password) throws SQLException {
         addUser(userName, login, password, false, false);
@@ -47,6 +78,8 @@ public class DataBase {
         }
     }
 
+
+
     public static void deleteUser(int userId) throws SQLException {
         Connection connection = null;
         try {
@@ -61,17 +94,16 @@ public class DataBase {
             }
         }
     }
-
-    public static void addProduct(String productName, String productDescription, double productPrice, String imageUrl, int productCount) throws SQLException {
+    public static void addProduct(Product product) throws SQLException {
         Connection connection = null;
         try {
             connection = ConnectionPool.getInstance().getConnection();
             try (PreparedStatement preparedStatement = connection.prepareStatement(ADD_PRODUCT_QUERY)) {
-                preparedStatement.setString(1, productName);
-                preparedStatement.setString(2, productDescription);
-                preparedStatement.setDouble(3, productPrice);
-                preparedStatement.setString(4, imageUrl);
-                preparedStatement.setInt(5, productCount);
+                preparedStatement.setString(1, product.getProductName());
+                preparedStatement.setString(2, product.getProductDescription());
+                preparedStatement.setDouble(3, product.getProductPrice());
+                preparedStatement.setBytes(4, product.getProductImage());
+                preparedStatement.setInt(5, product.getProductCount());
 
                 preparedStatement.executeUpdate();
             }
@@ -81,6 +113,7 @@ public class DataBase {
             }
         }
     }
+
 
     public static void deleteProduct(int productId) throws SQLException {
         Connection connection = null;

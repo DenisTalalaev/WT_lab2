@@ -1,4 +1,4 @@
-package bsuir.dtalalaev.lab2.entities;
+package bsuir.dtalalaev.lab2.dbcontrollers;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -38,6 +38,13 @@ public class ConnectionPool {
         }
 
         Connection connection = connectionPool.removeFirst();
+
+        // Проверка валидности соединения перед выдачей
+        if (!connection.isValid(5)) { // 5 секунд таймаут для проверки валидности
+            // Если соединение невалидное, создайте новое
+            connection = createConnection();
+        }
+
         usedConnections.addLast(connection);
         return connection;
     }

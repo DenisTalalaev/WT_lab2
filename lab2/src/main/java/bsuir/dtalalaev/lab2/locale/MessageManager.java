@@ -1,4 +1,4 @@
-package bsuir.dtalalaev.lab2;
+package bsuir.dtalalaev.lab2.locale;
 
 public class MessageManager {
 
@@ -73,6 +73,15 @@ public class MessageManager {
             case BY: return new MessageManager(language, "Памылка", "Памылка атрымання спісу карыстальнікаў");
             case EN: return new MessageManager(language, "Error", "Error getting the list of users");
             case RU: return new MessageManager(language, "Ошибка", "Ошибка получения списка пользователей");
+            default: return getWelcomeMessage(Language.EN);
+        }
+    }
+
+    public static Object getGetProductListException(Language language) {
+        switch (language){
+            case BY: return new MessageManager(language, "Памылка", "Памылка атрымання спісу прадуктаў");
+            case EN: return new MessageManager(language, "Error", "Error getting the list of products");
+            case RU: return new MessageManager(language, "Ошибка", "Ошибка получения списка продуктов");
             default: return getWelcomeMessage(Language.EN);
         }
     }

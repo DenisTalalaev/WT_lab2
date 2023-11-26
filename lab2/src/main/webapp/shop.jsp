@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="bsuir.dtalalaev.lab2.MessageManager" %>
+<%@ page import="bsuir.dtalalaev.lab2.locale.MessageManager" %>
 <html>
 <head>
     <title>Product Page</title>

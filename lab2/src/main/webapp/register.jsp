@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
-<%@ page import="bsuir.dtalalaev.lab2.MessageManager" %>
+<%@ page import="bsuir.dtalalaev.lab2.locale.MessageManager" %>
 <!DOCTYPE html>
 <html>
 <head>

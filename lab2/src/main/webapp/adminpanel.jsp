@@ -32,7 +32,7 @@
             color: #4CAF50;
         }
 
-        .back-button {
+        .back-button, .products-button {
             background-color: #4CAF50;
             color: white;
             padding: 10px 20px;
@@ -41,6 +41,12 @@
             display: inline-block;
             font-size: 16px;
             margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .username-link {
+            color: #007bff;
+            text-decoration: underline;
             cursor: pointer;
         }
     </style>
@@ -63,6 +69,12 @@
         List<User> userList = (List<User>) request.getSession().getAttribute("users");
 
 %>
+<div>
+    <a class="back-button" href="shop.jsp">Back to Shop</a>
+    <form action="<%= request.getContextPath() %>/products" method="post" style="display: inline;">
+        <input type="submit" value="List of Products" class="products-button">
+    </form>
+</div>
 <table>
     <tr>
         <th>User ID</th>
@@ -77,7 +89,7 @@
     %>
     <tr>
         <td><%= user.getUserId() %></td>
-        <td><%= user.getUserName() %></td>
+        <td><a class="username-link" href="<%= request.getContextPath() %>/loadcart/<%= user.getUserId() %>"><%= user.getUserName() %></a></td>
         <td><%= user.getUserLogin() %></td>
         <td><%= user.isAdmin() %></td>
         <td><%= user.isBlocked() %></td>
@@ -93,7 +105,6 @@
         }
     %>
 </table>
-<a class="back-button" href="shop.jsp">Back to Shop</a>
 <%
 } else {
 %>
