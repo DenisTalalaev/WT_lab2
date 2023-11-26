@@ -49,6 +49,81 @@
             text-decoration: underline;
             cursor: pointer;
         }
+        .block-button {
+            background-color: #d9534f; /* Bootstrap's danger color */
+            color: white;
+            padding: 8px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Styles for Unblock button */
+        .unblock-button {
+            background-color: #5cb85c; /* Bootstrap's success color */
+            color: white;
+            padding: 8px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Styles for Promote button */
+        .promote-button {
+            background-color: #ffd700; /* Gold color */
+            color: white;
+            padding: 8px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Styles for Demote button */
+        .demote-button {
+            background-color: #000000; /* Black color */
+            color: #d9534f; /* Bootstrap's danger color */
+            padding: 8px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Styles for Block button */
+        .block-button:hover {
+            background-color: #c9302c; /* Darker shade of red on hover */
+        }
+
+        /* Styles for Unblock button */
+        .unblock-button:hover {
+            background-color: #4cae4c; /* Darker shade of green on hover */
+        }
+
+        /* Styles for Promote button */
+        .promote-button:hover {
+            background-color: #e5a00d; /* Darker shade of gold on hover */
+        }
+
+        /* Styles for Demote button */
+        .demote-button:hover {
+            background-color: #1e1e1e; /* Darker shade of black on hover */
+        }
+
     </style>
 </head>
 <body>
@@ -111,8 +186,19 @@
         <td>
             <form action="<%= request.getContextPath() %>/adminAction/<%= user.getUserId() %>" method="post">
                 <input type="hidden" name="userId" value="<%= user.getUserId() %>">
-                <input type="submit" name="action" value="<%= user.isAdmin()?"Demote":"Promote"%>">
-                <input type="submit" name="action" value="<%=user.isBlocked()?"Unblock":"Block"%>">
+
+                <%
+                    String blockButtonValue = user.isBlocked() ? "Unblock" : "Block";
+                    String promoteButtonValue = user.isAdmin() ? "Demote" : "Promote";
+                %>
+
+                <!-- Block/Unblock button -->
+                <input type="submit" name="action" value="<%= blockButtonValue %>" class="<%= user.isBlocked() ? "unblock-button" : "block-button" %>">
+
+                <!-- Promote/Demote button -->
+                <input type="submit" name="action" value="<%= promoteButtonValue %>" class="<%= user.isAdmin() ? "demote-button" : "promote-button" %>">
+
+
             </form>
         </td>
     </tr>
@@ -124,6 +210,9 @@
 } else {
 %>
 <h1>Access Denied</h1>
+<form action="<%= request.getContextPath() %>/loadshop" method="post" style="display: inline;">
+    <input type="submit" value="Back to shop" class="back-button">
+</form>
 <%
     }
 %>

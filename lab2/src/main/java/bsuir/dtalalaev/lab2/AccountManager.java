@@ -106,6 +106,9 @@ public class AccountManager {
     public static void loadShop(HelloServlet servlet, HttpServletResponse resp, HttpServletRequest req) throws SQLException, ServletException, IOException {
         List<Product> products = DataBase.getAllProducts();
         req.getSession().setAttribute("products", products);
+        int userId = Integer.parseInt((String)req.getSession().getAttribute("userid"));
+        req.getSession().setAttribute("isadmin", DataBase.isAdmin(userId));
+        req.getSession().setAttribute("isblocked", DataBase.isBlocked(userId));
         servlet.getServletContext().getRequestDispatcher("/shop.jsp").forward(req, resp);
     }
 
@@ -138,6 +141,13 @@ public class AccountManager {
         int quantityInt = Integer.parseInt(quantity);
 
         DataBase.updateUserCartCol(userIdInt, cartIdInt, quantityInt);
+        AccountManager.loadUserCartPage(helloServlet, req, resp);
+    }
+
+    public static void deleteCart(HelloServlet helloServlet, HttpServletResponse resp, HttpServletRequest req, String uri) throws SQLException, ServletException, IOException {
+        int cartId = Integer.parseInt(uri.split("/")[uri.split("/").length - 1]);
+        int userId = DataBase.getUserIdByCartId(cartId);
+        DataBase.deleteCartByCartId(cartId);
         AccountManager.loadUserCartPage(helloServlet, req, resp);
     }
 }

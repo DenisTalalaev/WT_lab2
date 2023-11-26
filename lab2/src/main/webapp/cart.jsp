@@ -123,7 +123,7 @@
         <td><%= totalPrice %></td>
 
         <td>
-            <form action="<%= request.getContextPath() %>/deleteCart/<%= cartItem.getCartId() %>" method="post">
+            <form action="<%= request.getContextPath() %>/deleteCartUser/<%= cartItem.getCartId() %>" method="post">
                 <input type="submit" value="Delete" class="delete-button">
             </form>
         </td>

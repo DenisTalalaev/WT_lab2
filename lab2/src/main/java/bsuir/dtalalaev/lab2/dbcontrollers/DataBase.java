@@ -30,6 +30,7 @@ public class DataBase {
     private static final String DELETE_CART_BY_CART_ID_QUERY = "DELETE FROM cart WHERE c_id = ?";
     private static final String ADD_CART_QUERY = "INSERT INTO cart (u_id, p_id, p_col) VALUES (?, ?, ?)";
     private static final String UPDATE_CART_COL_QUERY = "UPDATE cart SET p_col = ? WHERE u_id = ? AND c_id = ?";
+    private static final String DELETE_FROM_CART_QUERY = "DELETE FROM cart WHERE p_id = ?\n";
 
     public static void deleteCartByCartId(int cartId) throws SQLException {
         Connection connection = null;
@@ -214,8 +215,15 @@ public class DataBase {
         try {
             connection = ConnectionPool.getInstance().getConnection();
             try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_PRODUCT_QUERY)) {
+                // Удаляем продукт из таблицы "product"
                 preparedStatement.setInt(1, productId);
                 preparedStatement.executeUpdate();
+
+                // Удаляем все связанные записи из таблицы "cart"
+                try (PreparedStatement deleteFromCart = connection.prepareStatement(DELETE_FROM_CART_QUERY)) {
+                    deleteFromCart.setInt(1, productId);
+                    deleteFromCart.executeUpdate();
+                }
             }
         } finally {
             if (connection != null) {
@@ -223,6 +231,7 @@ public class DataBase {
             }
         }
     }
+
 
     public static void updateUserStatus(int userId, boolean isAdmin, boolean isBlocked) throws SQLException {
         Connection connection = null;

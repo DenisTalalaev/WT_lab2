@@ -79,11 +79,8 @@ public class AdminController {
             }
         }
         int adminId = Integer.parseInt(((String) req.getSession().getAttribute("userid")));
-        if (DataBase.isAdmin(adminId)) {
-            AdminController.loadAdminPanel(helloServlet, req, resp);
-        } else {
-            AccountManager.logout(helloServlet, req, resp);
-        }
+        req.getSession().setAttribute("isadmin", DataBase.isAdmin(adminId));
+        AdminController.loadAdminPanel(helloServlet, req, resp);
     }
 
     public static void loadProductsPage(HelloServlet servlet, HttpServletRequest req, HttpServletResponse resp) {

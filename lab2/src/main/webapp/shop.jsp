@@ -6,6 +6,25 @@
 <html>
 <head>
     <title>Product Page</title>
+
+    <style>
+        /* Стили для всплывающего окна */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+    </style>
+
+
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -162,6 +181,7 @@
 <% if (!isBlocked) { %>
 <h2 style="color: #4CAF50; text-align: center;">Products</h2>
 
+
 <div class="product-container">
     <%
         List<Product> products = (List<Product>) request.getSession().getAttribute("products");
@@ -184,7 +204,9 @@
     <%
         }
     %>
+
 </div>
+
 <% } %>
 
 </body>
