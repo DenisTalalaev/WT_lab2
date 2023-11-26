@@ -32,7 +32,7 @@
             color: #4CAF50;
         }
 
-        .back-button, .products-button {
+        .back-button {
             background-color: #4CAF50;
             color: white;
             padding: 10px 20px;
@@ -54,8 +54,7 @@
 <body>
 <%
     boolean reload = false;
-    if(request.getSession().getAttribute("reload") != null)
-    {
+    if (request.getSession().getAttribute("reload") != null) {
         request.getSession().setAttribute("reload", null);
 %>
 <script>
@@ -72,7 +71,7 @@
 <div>
     <a class="back-button" href="shop.jsp">Back to Shop</a>
     <form action="<%= request.getContextPath() %>/products" method="post" style="display: inline;">
-        <input type="submit" value="List of Products" class="products-button">
+        <input type="submit" value="List of Products" class="back-button">
     </form>
 </div>
 <table>
@@ -88,17 +87,25 @@
         for (User user : userList) {
     %>
     <tr>
-        <td><%= user.getUserId() %></td>
+        <td><%= user.getUserId() %>
+        </td>
+
         <td>
-            <form id="userForm<%= user.getUserId() %>" action="<%= request.getContextPath() %>/loadcart/<%= user.getUserId() %>" method="post">
+            <form id="userForm<%= user.getUserId() %>"
+                  action="<%= request.getContextPath() %>/loadcart/<%= user.getUserId() %>" method="post">
                 <input type="hidden" name="postAction" value="true">
-                <a class="username-link" href="#" onclick="document.getElementById('userForm<%= user.getUserId() %>').submit(); return false;"><%= user.getUserName() %></a>
+                <a class="username-link" href="#"
+                   onclick="document.getElementById('userForm<%= user.getUserId() %>').submit(); return false;"><%= user.getUserName() %>
+                </a>
             </form>
         </td>
 
-        <td><%= user.getUserLogin() %></td>
-        <td><%= user.isAdmin() %></td>
-        <td><%= user.isBlocked() %></td>
+        <td><%= user.getUserLogin() %>
+        </td>
+        <td><%= user.isAdmin() %>
+        </td>
+        <td><%= user.isBlocked() %>
+        </td>
         <td>
             <form action="<%= request.getContextPath() %>/adminAction/<%= user.getUserId() %>" method="post">
                 <input type="hidden" name="userId" value="<%= user.getUserId() %>">

@@ -28,6 +28,8 @@ public class DataBase {
     private static final String GET_LOGIN_BY_USER_ID_QUERY = "SELECT u_login FROM user WHERE u_id = ?";
     private static final String GET_USER_ID_BY_CART_ID_QUERY = "SELECT u_id FROM cart WHERE c_id = ?";
     private static final String DELETE_CART_BY_CART_ID_QUERY = "DELETE FROM cart WHERE c_id = ?";
+    private static final String ADD_CART_QUERY = "INSERT INTO cart (u_id, p_id, p_col) VALUES (?, ?, ?)";
+    private static final String UPDATE_CART_COL_QUERY = "UPDATE cart SET p_col = ? WHERE u_id = ? AND c_id = ?";
 
     public static void deleteCartByCartId(int cartId) throws SQLException {
         Connection connection = null;
@@ -66,6 +68,28 @@ public class DataBase {
         }
         return userId;
     }
+
+    public static void addCartItem(int userId, int productId, int count) throws SQLException {
+        Connection connection = null;
+
+        try {
+            connection = ConnectionPool.getInstance().getConnection();
+
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(ADD_CART_QUERY)) {
+                preparedStatement.setInt(1, userId);
+                preparedStatement.setInt(2, productId);
+                preparedStatement.setInt(3, count);
+
+                preparedStatement.executeUpdate();
+            }
+        } finally {
+            if (connection != null) {
+                ConnectionPool.getInstance().releaseConnection(connection);
+            }
+        }
+    }
+
 
     public static List<Cart> getCartItemsByUserId(int userId) throws SQLException {
         List<Cart> cartList = new ArrayList<>();
@@ -387,4 +411,64 @@ public class DataBase {
     public static void demoteAdmin(int userId) throws SQLException {
         updateUserStatus(userId, false, DataBase.isBlocked(userId));
     }
+
+    public static Product getProductById(int productId) {
+        Product product = null;
+        Connection connection = null;
+
+        try {
+            connection = ConnectionPool.getInstance().getConnection();
+            String query = "SELECT * FROM product WHERE p_id = ?";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setInt(1, productId);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        String productName = resultSet.getString("p_name");
+                        String productDescription = resultSet.getString("p_description");
+                        double productPrice = resultSet.getDouble("p_price");
+                        byte[] productImage = resultSet.getBytes("p_image");
+                        int productCount = resultSet.getInt("p_count");
+
+                        product = new Product(productId, productName, productDescription, productPrice, productImage, productCount);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            // Обработка исключений, например, логирование ошибок
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    ConnectionPool.getInstance().releaseConnection(connection);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        return product;
+    }
+
+    public static void updateUserCartCol(int userId, int cartId, int quantity) throws SQLException {
+        Connection connection = null;
+
+        try {
+            connection = ConnectionPool.getInstance().getConnection();
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CART_COL_QUERY)) {
+                preparedStatement.setInt(1, quantity);
+                preparedStatement.setInt(2, userId);
+                preparedStatement.setInt(3, cartId);
+
+                preparedStatement.executeUpdate();
+            }
+        } finally {
+            if (connection != null) {
+                ConnectionPool.getInstance().releaseConnection(connection);
+            }
+        }
+    }
+
 }
