@@ -1,5 +1,6 @@
 package bsuir.dtalalaev.lab2.dbcontrollers;
 
+import bsuir.dtalalaev.lab2.entities.Cart;
 import bsuir.dtalalaev.lab2.entities.Product;
 import bsuir.dtalalaev.lab2.entities.User;
 
@@ -23,6 +24,75 @@ public class DataBase {
     private static final String GET_ALL_USERS_QUERY = "SELECT * FROM user";
     private static final String IS_BLOCKED_QUERY = "SELECT u_is_blocked FROM user WHERE u_id = ?";
     private static final String GET_USER_ID_BY_LOGIN_AND_PASSWORD_QUERY = "SELECT u_id FROM user WHERE u_login = ? AND u_pass_hash = ?";
+    private static final String GET_CART_ITEMS_BY_USER_ID_QUERY = "SELECT * FROM cart WHERE u_id = ?";
+    private static final String GET_LOGIN_BY_USER_ID_QUERY = "SELECT u_login FROM user WHERE u_id = ?";
+    private static final String GET_USER_ID_BY_CART_ID_QUERY = "SELECT u_id FROM cart WHERE c_id = ?";
+    private static final String DELETE_CART_BY_CART_ID_QUERY = "DELETE FROM cart WHERE c_id = ?";
+
+    public static void deleteCartByCartId(int cartId) throws SQLException {
+        Connection connection = null;
+        try {
+            connection = ConnectionPool.getInstance().getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CART_BY_CART_ID_QUERY)) {
+                preparedStatement.setInt(1, cartId);
+                preparedStatement.executeUpdate();
+            }
+        } finally {
+            if (connection != null) {
+                ConnectionPool.getInstance().releaseConnection(connection);
+            }
+        }
+    }
+
+
+    public static int getUserIdByCartId(int cartId) throws SQLException {
+        int userId = -1;
+        Connection connection = null;
+        try {
+            connection = ConnectionPool.getInstance().getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(GET_USER_ID_BY_CART_ID_QUERY)) {
+                preparedStatement.setInt(1, cartId);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        userId = resultSet.getInt("u_id");
+                    }
+                }
+            }
+        } finally {
+            if (connection != null) {
+                ConnectionPool.getInstance().releaseConnection(connection);
+            }
+        }
+        return userId;
+    }
+
+    public static List<Cart> getCartItemsByUserId(int userId) throws SQLException {
+        List<Cart> cartList = new ArrayList<>();
+        Connection connection = null;
+        try {
+            connection = ConnectionPool.getInstance().getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(GET_CART_ITEMS_BY_USER_ID_QUERY)) {
+                preparedStatement.setInt(1, userId);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        int cartId = resultSet.getInt("c_id");
+                        int productId = resultSet.getInt("p_id");
+                        int count = resultSet.getInt("p_col");
+
+                        Cart cartItem = new Cart(cartId, userId, productId, count);
+                        cartList.add(cartItem);
+                    }
+                }
+            }
+        } finally {
+            if (connection != null) {
+                ConnectionPool.getInstance().releaseConnection(connection);
+            }
+        }
+        return cartList;
+    }
 
     public static List<Product> getAllProducts() throws SQLException {
         List<Product> productList = new ArrayList<>();
@@ -138,38 +208,6 @@ public class DataBase {
                 preparedStatement.setBoolean(1, isAdmin);
                 preparedStatement.setBoolean(2, isBlocked);
                 preparedStatement.setInt(3, userId);
-                preparedStatement.executeUpdate();
-            }
-        } finally {
-            if (connection != null) {
-                ConnectionPool.getInstance().releaseConnection(connection);
-            }
-        }
-    }
-
-    public static void addBucket(int productId, int productCol, int productAddingDate) throws SQLException {
-        Connection connection = null;
-        try {
-            connection = ConnectionPool.getInstance().getConnection();
-            try (PreparedStatement preparedStatement = connection.prepareStatement(ADD_BUCKET_QUERY)) {
-                preparedStatement.setInt(1, productId);
-                preparedStatement.setInt(2, productCol);
-                preparedStatement.setInt(3, productAddingDate);
-                preparedStatement.executeUpdate();
-            }
-        } finally {
-            if (connection != null) {
-                ConnectionPool.getInstance().releaseConnection(connection);
-            }
-        }
-    }
-
-    public static void deleteBucket(int bucketId) throws SQLException {
-        Connection connection = null;
-        try {
-            connection = ConnectionPool.getInstance().getConnection();
-            try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_BUCKET_QUERY)) {
-                preparedStatement.setInt(1, bucketId);
                 preparedStatement.executeUpdate();
             }
         } finally {
@@ -312,6 +350,26 @@ public class DataBase {
             }
         }
         return -1;
+    }
+
+    public static String getLoginByUserId(int userId) throws SQLException {
+        Connection connection = null;
+        try {
+            connection = ConnectionPool.getInstance().getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(GET_LOGIN_BY_USER_ID_QUERY)) {
+                preparedStatement.setInt(1, userId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getString("u_login");
+                    }
+                }
+            }
+        } finally {
+            if (connection != null) {
+                ConnectionPool.getInstance().releaseConnection(connection);
+            }
+        }
+        return null; // или выберите другое значение по умолчанию, в зависимости от ваших требований
     }
 
     public static void banUser(int userId) throws SQLException {

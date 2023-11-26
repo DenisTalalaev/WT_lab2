@@ -1,6 +1,7 @@
 package bsuir.dtalalaev.lab2;
 
 import bsuir.dtalalaev.lab2.dbcontrollers.DataBase;
+import bsuir.dtalalaev.lab2.entities.Cart;
 import bsuir.dtalalaev.lab2.entities.Product;
 import bsuir.dtalalaev.lab2.entities.User;
 import bsuir.dtalalaev.lab2.locale.LanguageFabric;
@@ -13,13 +14,8 @@ import jakarta.servlet.http.Part;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 
 public class AdminController {
     public static void loadAdminPanel(HelloServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
@@ -37,7 +33,7 @@ public class AdminController {
     public static void handleAdminAction(HelloServlet helloServlet, HttpServletResponse resp, HttpServletRequest req, String uri, String lastPathSegment) throws SQLException, IOException {
         String pathInfo = req.getPathInfo();
         String[] pathParts = pathInfo.split("/");
-        if(!DataBase.isAdmin(Integer.parseInt((String)req.getSession().getAttribute("userid")))){
+        if (!DataBase.isAdmin(Integer.parseInt((String) req.getSession().getAttribute("userid")))) {
             AccountManager.logout(helloServlet, req, resp);
             return;
         }
@@ -83,7 +79,7 @@ public class AdminController {
             }
         }
         int adminId = Integer.parseInt(((String) req.getSession().getAttribute("userid")));
-        if(DataBase.isAdmin(adminId)){
+        if (DataBase.isAdmin(adminId)) {
             AdminController.loadAdminPanel(helloServlet, req, resp);
         } else {
             AccountManager.logout(helloServlet, req, resp);
@@ -136,9 +132,28 @@ public class AdminController {
     }
 
 
-
     public static void deleteProduct(HelloServlet helloServlet, HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException {
         DataBase.deleteProduct(Integer.parseInt(req.getParameter("productId")));
         AdminController.loadProductsPage(helloServlet, req, resp);
+    }
+
+    public static void loadAdminCartPage(HelloServlet servlet, HttpServletResponse resp, HttpServletRequest req, int userId) {
+        try {
+            List<Cart> usercart = DataBase.getCartItemsByUserId(userId);
+            req.getSession().setAttribute("usercart", usercart);
+            req.getSession().setAttribute("username", DataBase.getLoginByUserId(userId));
+            servlet.getServletContext().getRequestDispatcher("/admincart.jsp").forward(req, resp);
+        } catch (SQLException e) {
+            req.getSession().setAttribute(MessageManager.EXCEPTION, MessageManager.getGetProductListException(LanguageFabric.parseLanguage(CookieManager.getLangFromCookie(req))));
+        } catch (ServletException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void deleteCart(HelloServlet servlet, HttpServletResponse resp, HttpServletRequest req, String uri) throws SQLException {
+        int cartId = Integer.parseInt(uri.split("/")[uri.split("/").length - 1]);
+        int userId = DataBase.getUserIdByCartId(cartId);
+        DataBase.deleteCartByCartId(cartId);
+        AdminController.loadAdminCartPage(servlet, resp, req, userId);
     }
 }

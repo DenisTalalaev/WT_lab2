@@ -89,7 +89,13 @@
     %>
     <tr>
         <td><%= user.getUserId() %></td>
-        <td><a class="username-link" href="<%= request.getContextPath() %>/loadcart/<%= user.getUserId() %>"><%= user.getUserName() %></a></td>
+        <td>
+            <form id="userForm<%= user.getUserId() %>" action="<%= request.getContextPath() %>/loadcart/<%= user.getUserId() %>" method="post">
+                <input type="hidden" name="postAction" value="true">
+                <a class="username-link" href="#" onclick="document.getElementById('userForm<%= user.getUserId() %>').submit(); return false;"><%= user.getUserName() %></a>
+            </form>
+        </td>
+
         <td><%= user.getUserLogin() %></td>
         <td><%= user.isAdmin() %></td>
         <td><%= user.isBlocked() %></td>
