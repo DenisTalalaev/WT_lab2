@@ -20,6 +20,12 @@ import java.util.List;
 public class AdminController {
     public static void loadAdminPanel(HelloServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
         try {
+            int userid = Integer.parseInt(((String) req.getSession().getAttribute("userid")));
+            if(DataBase.isAdmin(userid)){
+                req.getSession().setAttribute("isadmin", Boolean.TRUE);
+            } else {
+                req.getSession().setAttribute("isadmin", Boolean.FALSE);
+            }
             List<User> userList = DataBase.getAllUsers();
             req.getSession().setAttribute("users", userList);
             servlet.getServletContext().getRequestDispatcher("/adminpanel.jsp").forward(req, resp);
@@ -85,6 +91,12 @@ public class AdminController {
 
     public static void loadProductsPage(HelloServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
         try {
+            int userid = Integer.parseInt(((String) req.getSession().getAttribute("userid")));
+            if(DataBase.isAdmin(userid)){
+                req.getSession().setAttribute("isadmin", Boolean.TRUE);
+            } else {
+                req.getSession().setAttribute("isadmin", Boolean.FALSE);
+            }
             List<Product> productList = DataBase.getAllProducts();
             req.getSession().setAttribute("products", productList);
             servlet.getServletContext().getRequestDispatcher("/products.jsp").forward(req, resp);

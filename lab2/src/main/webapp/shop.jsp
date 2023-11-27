@@ -1,11 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="bsuir.dtalalaev.lab2.locale.MessageManager" %>
-<%@ page import="bsuir.dtalalaev.lab2.entities.Product" %>
 <%@ page import="java.util.Base64" %>
-<%@ page import="java.util.List" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <html>
 <head>
     <title>Product Page</title>
+
 
     <style>
         /* Стили для всплывающего окна */
@@ -22,7 +21,6 @@
             z-index: 1000;
         }
     </style>
-
 
 
     <style>
@@ -74,7 +72,10 @@
             max-width: 100%;
             max-height: 150px;
             object-fit: cover;
+            margin: auto;
             margin-bottom: 10px;
+            align-content: center;
+            align-items: center;
         }
 
         h3 {
@@ -133,6 +134,9 @@
             background-color: #2196F3; /* AdminPanel button color */
         }
     </style>
+
+
+
 </head>
 <body>
 
@@ -148,66 +152,46 @@
             <button type="submit">Cart</button>
         </form>
 
-        <% if ((Boolean) request.getSession().getAttribute("isadmin")) { %>
-        <form method="post" action="adminpanel">
-            <button type="submit">AdminPanel</button>
-        </form>
-        <% } %>
+        <c:if test="${sessionScope.isadmin}">
+            <form method="post" action="adminpanel">
+                <button type="submit">AdminPanel</button>
+            </form>
+        </c:if>
     </div>
 </div>
 
-<%
-    boolean isBlocked = false;
-    MessageManager message = (MessageManager) request.getAttribute(MessageManager.MESSAGE);
-    MessageManager exception = (MessageManager) request.getAttribute(MessageManager.EXCEPTION);
-    int userid = -1;
-    if (request.getSession().getAttribute("userid") != null) {
-        userid = Integer.parseInt((String) request.getSession().getAttribute("userid"));
-    }
-    if(request.getSession().getAttribute("isblocked") != null) {
-        if((Boolean) request.getSession().getAttribute("isblocked")){
-            isBlocked = true;
-        }
-    }
-    if(userid == -1 && !isBlocked) {
-        response.sendRedirect("/login.jsp");
-    } else if (isBlocked) {
-%>
-<h1> На вас наложили великую печать бана.</h1>
-<%
-    }
-%>
+<c:choose>
+    <c:when test="${empty sessionScope.userid}">
+        <c:redirect url="/login.jsp"/>
+    </c:when>
+    <c:when test="${sessionScope.isblocked}">
+        <h1>На вас наложили великую печать бана.</h1>
+    </c:when>
+    <c:otherwise>
 
-<% if (!isBlocked) { %>
-<h2 style="color: #4CAF50; text-align: center;">Products</h2>
+        <h2 style="color: #4CAF50; text-align: center;">Products</h2>
 
+        <div class="product-container">
+            <c:forEach var="product" items="${sessionScope.products}">
+                <div class="product-block">
+                    <img src="data:image/png;base64, ${Base64.getEncoder().encodeToString(product.productImage)}" alt="${product.productName}">
+                    <h3>${product.productName}</h3>
+                    <p>${product.productDescription}</p>
+                    <p class="price">$${product.productPrice}</p>
 
-<div class="product-container">
-    <%
-        List<Product> products = (List<Product>) request.getSession().getAttribute("products");
-        for (Product product : products) {
-    %>
-    <div class="product-block">
-        <img src="<%= "data:image/png;base64, " + Base64.getEncoder().encodeToString(product.getProductImage()) %>" alt="<%= product.getProductName() %>">
-        <h3><%= product.getProductName() %></h3>
-        <p><%= product.getProductDescription() %></p>
-        <p class="price">$<%= product.getProductPrice() %></p>
+                    <form method="post" action="addToCart">
+                        <input type="hidden" name="userId" value="${sessionScope.userid}">
+                        <input type="hidden" name="productId" value="${product.productId}">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+                        <button type="submit" class="add-to-cart-form">Add to Cart</button>
+                    </form>
+                </div>
+            </c:forEach>
+        </div>
 
-        <form method="post" action="addToCart">
-            <input type="hidden" name="userId" value="<%= request.getSession().getAttribute("userid") %>">
-            <input type="hidden" name="productId" value="<%= product.getProductId() %>">
-            <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity" name="quantity" min="1" value="1" required>
-            <button type="submit" class="add-to-cart-form">Add to Cart</button>
-        </form>
-    </div>
-    <%
-        }
-    %>
-
-</div>
-
-<% } %>
+    </c:otherwise>
+</c:choose>
 
 </body>
 </html>

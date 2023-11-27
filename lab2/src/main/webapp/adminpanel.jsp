@@ -1,9 +1,13 @@
 <%@ page import="bsuir.dtalalaev.lab2.entities.User" %>
 <%@ page import="java.util.List" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+
 <html>
 <head>
     <title>User Management</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -125,97 +129,70 @@
         }
 
     </style>
+
 </head>
 <body>
-<%
-    boolean reload = false;
-    if (request.getSession().getAttribute("reload") != null) {
-        request.getSession().setAttribute("reload", null);
-%>
-<script>
-    location.reload(true);
-</script>
-<%
-    }
 
-    boolean isadmin = (Boolean) request.getSession().getAttribute("isadmin");
-    if (isadmin) {
-        List<User> userList = (List<User>) request.getSession().getAttribute("users");
+<c:if test="${not empty reload}">
+    <script>
+        location.reload(true);
+    </script>
+</c:if>
 
-%>
-<div>
-    <form action="<%= request.getContextPath() %>/loadshop" method="post" style="display: inline;">
+<c:if test="${isadmin}">
+    <div>
+        <form action="${pageContext.request.contextPath}/loadshop" method="post" style="display: inline;">
+            <input type="submit" value="Back to shop" class="back-button">
+        </form>
+        <form action="${pageContext.request.contextPath}/products" method="post" style="display: inline;">
+            <input type="submit" value="List of Products" class="back-button">
+        </form>
+    </div>
+    <table>
+        <tr>
+            <th>User ID</th>
+            <th>User Name</th>
+            <th>User Login</th>
+            <th>Is Admin</th>
+            <th>Is Blocked</th>
+            <th>Action</th>
+        </tr>
+
+        <c:forEach var="user" items="${users}">
+            <tr>
+                <td>${user.userId}</td>
+                <td>
+                    <form id="userForm${user.userId}" action="${pageContext.request.contextPath}/loadcart/${user.userId}" method="post">
+                        <input type="hidden" name="postAction" value="true">
+                        <a class="username-link" href="#" onclick="document.getElementById('userForm${user.userId}').submit(); return false;">${user.userName}</a>
+                    </form>
+                </td>
+                <td>${user.userLogin}</td>
+                <td>${user.admin}</td>
+                <td>${user.blocked}</td>
+                <td>
+                    <form action="${pageContext.request.contextPath}/adminAction/${user.userId}" method="post">
+                        <input type="hidden" name="userId" value="${user.userId}">
+
+                        <c:set var="blockButtonValue" value="${user.blocked ? 'Unblock' : 'Block'}"/>
+                        <c:set var="promoteButtonValue" value="${user.admin ? 'Demote' : 'Promote'}"/>
+
+                        <input type="submit" name="action" value="${blockButtonValue}" class="${user.blocked ? 'unblock-button' : 'block-button'}">
+                        <input type="submit" name="action" value="${promoteButtonValue}" class="${user.admin ? 'demote-button' : 'promote-button'}">
+                    </form>
+                </td>
+            </tr>
+        </c:forEach>
+
+    </table>
+</c:if>
+
+<c:if test="${not isadmin}">
+    <h1>Access Denied</h1>
+    <form action="${pageContext.request.contextPath}/loadshop" method="post" style="display: inline;">
         <input type="submit" value="Back to shop" class="back-button">
     </form>
-    <form action="<%= request.getContextPath() %>/products" method="post" style="display: inline;">
-        <input type="submit" value="List of Products" class="back-button">
-    </form>
-</div>
-<table>
-    <tr>
-        <th>User ID</th>
-        <th>User Name</th>
-        <th>User Login</th>
-        <th>Is Admin</th>
-        <th>Is Blocked</th>
-        <th>Action</th>
-    </tr>
-    <%
-        for (User user : userList) {
-    %>
-    <tr>
-        <td><%= user.getUserId() %>
-        </td>
-
-        <td>
-            <form id="userForm<%= user.getUserId() %>"
-                  action="<%= request.getContextPath() %>/loadcart/<%= user.getUserId() %>" method="post">
-                <input type="hidden" name="postAction" value="true">
-                <a class="username-link" href="#"
-                   onclick="document.getElementById('userForm<%= user.getUserId() %>').submit(); return false;"><%= user.getUserName() %>
-                </a>
-            </form>
-        </td>
-
-        <td><%= user.getUserLogin() %>
-        </td>
-        <td><%= user.isAdmin() %>
-        </td>
-        <td><%= user.isBlocked() %>
-        </td>
-        <td>
-            <form action="<%= request.getContextPath() %>/adminAction/<%= user.getUserId() %>" method="post">
-                <input type="hidden" name="userId" value="<%= user.getUserId() %>">
-
-                <%
-                    String blockButtonValue = user.isBlocked() ? "Unblock" : "Block";
-                    String promoteButtonValue = user.isAdmin() ? "Demote" : "Promote";
-                %>
-
-                <!-- Block/Unblock button -->
-                <input type="submit" name="action" value="<%= blockButtonValue %>" class="<%= user.isBlocked() ? "unblock-button" : "block-button" %>">
-
-                <!-- Promote/Demote button -->
-                <input type="submit" name="action" value="<%= promoteButtonValue %>" class="<%= user.isAdmin() ? "demote-button" : "promote-button" %>">
-
-
-            </form>
-        </td>
-    </tr>
-    <%
-        }
-    %>
-</table>
-<%
-} else {
-%>
-<h1>Access Denied</h1>
-<form action="<%= request.getContextPath() %>/loadshop" method="post" style="display: inline;">
-    <input type="submit" value="Back to shop" class="back-button">
-</form>
-<%
-    }
-%>
+</c:if>
 
 </body>
 </html>

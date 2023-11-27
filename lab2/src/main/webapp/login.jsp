@@ -72,26 +72,29 @@
 <div>
     <h2>Login</h2>
 
-    <%
-        MessageManager message = (MessageManager) request.getAttribute(MessageManager.MESSAGE);
-        MessageManager exception = (MessageManager) request.getAttribute(MessageManager.EXCEPTION);
-    %>
+    <c:choose>
+        <c:when test="${not empty requestScope.message}">
+            ${requestScope.message.name}
+            <br>
+            ${requestScope.message.description}
+            <br>
+        </c:when>
+        <c:otherwise>
+            <%-- Ничего не делаем --%>
+        </c:otherwise>
+    </c:choose>
 
-    <%-- Проверка на null перед выводом сообщений --%>
-    <% if (message != null) { %>
-    <%= message.getName()%>
-    <br>
-    <%= message.getDescription()%>
-    <br>
-    <% } %>
-
-    <%-- Проверка на null перед выводом исключения --%>
-    <% if (exception != null) { %>
-    <%= exception.getName()%>
-    <br>
-    <%= exception.getDescription()%>
-    <br>
-    <% } %>
+    <c:choose>
+        <c:when test="${not empty requestScope.exception}">
+            ${requestScope.exception.name}
+            <br>
+            ${requestScope.exception.description}
+            <br>
+        </c:when>
+        <c:otherwise>
+            <%-- Ничего не делаем --%>
+        </c:otherwise>
+    </c:choose>
 
     <!-- Форма авторизации -->
     <form action="login" method="post">

@@ -1,10 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List" %>
-<%@ page import="bsuir.dtalalaev.lab2.entities.Cart" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ page import="java.util.Base64" %>
+
 <html>
 <head>
     <title>Admin Cart Page</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,14 +60,12 @@
 </head>
 <body>
 
-<%
-    List<Cart> usercart = (List<Cart>) request.getSession().getAttribute("usercart");
-    String username = (String) request.getSession().getAttribute("username");
-%>
+<c:set var="usercart" value="${sessionScope.usercart}"/>
+<c:set var="username" value="${sessionScope.username}"/>
 
 <div>
-    <a class="back-button" href="<%= request.getContextPath() %>/adminpanel.jsp">Back to Admin Panel</a>
-    <span>Username: <%= username %></span>
+    <a class="back-button" href="${pageContext.request.contextPath}/adminpanel.jsp">Back to Admin Panel</a>
+    <span>Username: ${username}</span>
 </div>
 
 <table>
@@ -78,30 +77,27 @@
         <th>Action</th>
     </tr>
 
-    <%
-        for (Cart cartItem : usercart) {
-    %>
-    <tr>
-        <td><%= cartItem.getCartId() %></td>
-        <td><%= cartItem.getUserId() %></td>
-        <td style="display: flex; align-items: center;">
-            <img style="max-width: 100px; margin-right: 10px;" src="<%= "data:image/png;base64, " + Base64.getEncoder().encodeToString(cartItem.getProduct().getProductImage()) %>" alt="<%= cartItem.getProduct().getProductName() %>">
-            <div>
-                <p><strong><%= cartItem.getProduct().getProductName() %></strong></p>
-                <p><%= cartItem.getProduct().getProductDescription() %></p>
-            </div>
-        </td>
-
-        <td><%= cartItem.getCount() %></td>
-        <td>
-            <form action="<%= request.getContextPath() %>/deleteCart/<%= cartItem.getCartId() %>" method="post">
-                <input type="submit" value="Delete" class="delete-button">
-            </form>
-        </td>
-    </tr>
-    <%
-        }
-    %>
+    <c:forEach var="cartItem" items="${usercart}">
+        <tr>
+            <td>${cartItem.cartId}</td>
+            <td>${cartItem.userId}</td>
+            <td style="display: flex; align-items: center;">
+                <img style="max-width: 100px; margin-right: 10px;"
+                     src="data:image/png;base64,${Base64.getEncoder().encodeToString(cartItem.product.productImage)}"
+                     alt="${cartItem.product.productName}">
+                <div>
+                    <p><strong>${cartItem.product.productName}</strong></p>
+                    <p>${cartItem.product.productDescription}</p>
+                </div>
+            </td>
+            <td>${cartItem.count}</td>
+            <td>
+                <form action="${pageContext.request.contextPath}/deleteCart/${cartItem.cartId}" method="post">
+                    <input type="submit" value="Delete" class="delete-button">
+                </form>
+            </td>
+        </tr>
+    </c:forEach>
 </table>
 
 </body>
