@@ -7,18 +7,20 @@ import bsuir.dtalalaev.lab2.entities.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+/**
+ * Class for connect and user database
+ */
 public class DataBase {
+    private static final Logger logger = LogManager.getLogger(DataBase.class);
 
     private static final String GET_ALL_PRODUCTS_QUERY = "SELECT * FROM product";
     private static final String ADD_USER_QUERY = "INSERT INTO user (u_name, u_login, u_pass_hash, u_is_admin, u_is_blocked) VALUES (?, ?, ?, ?, ?)";
-    private static final String DELETE_USER_QUERY = "DELETE FROM user WHERE u_id = ?";
     private static final String ADD_PRODUCT_QUERY = "INSERT INTO product (p_name, p_description, p_price, p_image, p_count) VALUES (?, ?, ?, ?, ?)";
     private static final String DELETE_PRODUCT_QUERY = "DELETE FROM product WHERE p_id = ?";
     private static final String UPDATE_USER_STATUS_QUERY = "UPDATE user SET u_is_admin = ?, u_is_blocked = ? WHERE u_id = ?";
-    private static final String ADD_BUCKET_QUERY = "INSERT INTO bucket (p_id, p_col, p_adding_date) VALUES (?, ?, ?)";
-    private static final String DELETE_BUCKET_QUERY = "DELETE FROM bucket WHERE b_id = ?";
-    private static final String PRINT_TABLE_DATA_QUERY = "SELECT * FROM %s";
     private static final String CHECK_LOGIN_AND_PASSWORD_QUERY = "SELECT * FROM user WHERE u_login = ? AND u_pass_hash = ?";
     private static final String IS_ADMIN_QUERY = "SELECT u_is_admin FROM user WHERE u_id = ?";
     private static final String GET_ALL_USERS_QUERY = "SELECT * FROM user";
@@ -32,6 +34,12 @@ public class DataBase {
     private static final String UPDATE_CART_COL_QUERY = "UPDATE cart SET p_col = ? WHERE u_id = ? AND c_id = ?";
     private static final String DELETE_FROM_CART_QUERY = "DELETE FROM cart WHERE p_id = ?\n";
 
+
+    /**
+     * Method to delete cart by it id
+     * @param cartId
+     * @throws SQLException
+     */
     public static void deleteCartByCartId(int cartId) throws SQLException {
         Connection connection = null;
         try {
@@ -47,7 +55,12 @@ public class DataBase {
         }
     }
 
-
+    /**
+     * Find user by it's cart
+     * @param cartId
+     * @return
+     * @throws SQLException
+     */
     public static int getUserIdByCartId(int cartId) throws SQLException {
         int userId = -1;
         Connection connection = null;
@@ -70,6 +83,13 @@ public class DataBase {
         return userId;
     }
 
+    /**
+     * Add new cart for user. cart has a product and count of froduct
+     * @param userId
+     * @param productId
+     * @param count
+     * @throws SQLException
+     */
     public static void addCartItem(int userId, int productId, int count) throws SQLException {
         Connection connection = null;
 
@@ -91,7 +111,12 @@ public class DataBase {
         }
     }
 
-
+    /**
+     * Take all carts by userId
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
     public static List<Cart> getCartItemsByUserId(int userId) throws SQLException {
         List<Cart> cartList = new ArrayList<>();
         Connection connection = null;
@@ -119,6 +144,11 @@ public class DataBase {
         return cartList;
     }
 
+    /**
+     * Get all products rom the catalog
+     * @return
+     * @throws SQLException
+     */
     public static List<Product> getAllProducts() throws SQLException {
         List<Product> productList = new ArrayList<>();
         Connection connection = null;
@@ -148,11 +178,26 @@ public class DataBase {
         return productList;
     }
 
-
+    /**
+     * add user by login, name, password. no admin, no block
+     * @param userName
+     * @param login
+     * @param password
+     * @throws SQLException
+     */
     public static void addUser(String userName, String login, String password) throws SQLException {
         addUser(userName, login, password, false, false);
     }
 
+    /**
+     * Add new user with access paramentes: ban and admin
+     * @param userName
+     * @param login
+     * @param password
+     * @param isAdmin
+     * @param isBlocked
+     * @throws SQLException
+     */
     public static void addUser(String userName, String login, String password, boolean isAdmin, boolean isBlocked) throws SQLException {
         Connection connection = null;
         try {
@@ -166,6 +211,7 @@ public class DataBase {
 
                 preparedStatement.executeUpdate();
             }
+            logger.info("New user added");
         } finally {
             if (connection != null) {
                 ConnectionPool.getInstance().releaseConnection(connection);
@@ -173,22 +219,11 @@ public class DataBase {
         }
     }
 
-
-
-    public static void deleteUser(int userId) throws SQLException {
-        Connection connection = null;
-        try {
-            connection = ConnectionPool.getInstance().getConnection();
-            try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_USER_QUERY)) {
-                preparedStatement.setInt(1, userId);
-                preparedStatement.executeUpdate();
-            }
-        } finally {
-            if (connection != null) {
-                ConnectionPool.getInstance().releaseConnection(connection);
-            }
-        }
-    }
+    /**
+     * Method to add a product to the DB
+     * @param product
+     * @throws SQLException
+     */
     public static void addProduct(Product product) throws SQLException {
         Connection connection = null;
         try {
@@ -202,6 +237,7 @@ public class DataBase {
 
                 preparedStatement.executeUpdate();
             }
+            logger.info("New product added: " + product);
         } finally {
             if (connection != null) {
                 ConnectionPool.getInstance().releaseConnection(connection);
@@ -209,7 +245,11 @@ public class DataBase {
         }
     }
 
-
+    /**
+     * Method to delete product by it's id
+     * @param productId
+     * @throws SQLException
+     */
     public static void deleteProduct(int productId) throws SQLException {
         Connection connection = null;
         try {
@@ -225,6 +265,7 @@ public class DataBase {
                     deleteFromCart.executeUpdate();
                 }
             }
+            logger.info("Product with id " + productId + " deleted");
         } finally {
             if (connection != null) {
                 ConnectionPool.getInstance().releaseConnection(connection);
@@ -232,7 +273,13 @@ public class DataBase {
         }
     }
 
-
+    /**
+     * Method to undate block/isadmin sttus for user
+     * @param userId
+     * @param isAdmin
+     * @param isBlocked
+     * @throws SQLException
+     */
     public static void updateUserStatus(int userId, boolean isAdmin, boolean isBlocked) throws SQLException {
         Connection connection = null;
         try {
@@ -250,12 +297,13 @@ public class DataBase {
         }
     }
 
-    public static void printAllData() throws SQLException {
-        printTableData("user");
-        printTableData("product");
-        // Добавьте другие таблицы по мере необходимости
-    }
-
+    /**
+     * Method to authorize user by its login and password
+     * @param login
+     * @param password
+     * @return
+     * @throws SQLException
+     */
     public static boolean checkLoginAndPassword(String login, String password) throws SQLException {
         Connection connection = null;
         try {
@@ -264,7 +312,6 @@ public class DataBase {
                 preparedStatement.setString(1, login);
                 preparedStatement.setInt(2, password.hashCode());
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    System.out.println("Login succeeded");
                     return resultSet.next();
                 }
             }
@@ -272,31 +319,15 @@ public class DataBase {
             if (connection != null) {
                 ConnectionPool.getInstance().releaseConnection(connection);
             }
-            System.out.println("Login error");
         }
     }
 
-    private static void printTableData(String tableName) throws SQLException {
-        Connection connection = null;
-        try {
-            connection = ConnectionPool.getInstance().getConnection();
-            String query = String.format(PRINT_TABLE_DATA_QUERY, tableName);
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query);
-                 ResultSet resultSet = preparedStatement.executeQuery()) {
-
-                System.out.println("Data from table " + tableName + ":");
-                while (resultSet.next()) {
-                    System.out.println("Row: " + resultSet.getInt(1) + ", " + resultSet.getString(2) + ", " + resultSet.getString(3));
-                }
-                System.out.println();
-            }
-        } finally {
-            if (connection != null) {
-                ConnectionPool.getInstance().releaseConnection(connection);
-            }
-        }
-    }
-
+    /**
+     * returns true if user with UserID is admin
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
     public static boolean isAdmin(int userId) throws SQLException {
         Connection connection = null;
         try {
@@ -317,6 +348,11 @@ public class DataBase {
         return false;
     }
 
+    /**
+     * return list of all users in system
+     * @return
+     * @throws SQLException
+     */
     public static List<User> getAllUsers() throws SQLException {
         List<User> userList = new ArrayList<>();
         Connection connection = null;
@@ -344,6 +380,12 @@ public class DataBase {
         return userList;
     }
 
+    /**
+     * Method to check is User with UserId is blocked
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
     public static boolean isBlocked(int userId) throws SQLException {
         Connection connection = null;
         try {
@@ -364,6 +406,13 @@ public class DataBase {
         return false;
     }
 
+    /**
+     * Method to take a unserId by it's login and password
+     * @param login
+     * @param password
+     * @return
+     * @throws SQLException
+     */
     public static int getUserIdByLoginAndPassword(String login, String password) throws SQLException {
         Connection connection = null;
         try {
@@ -385,6 +434,12 @@ public class DataBase {
         return -1;
     }
 
+    /**
+     * Function to gae user login by userId
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
     public static String getLoginByUserId(int userId) throws SQLException {
         Connection connection = null;
         try {
@@ -405,22 +460,51 @@ public class DataBase {
         return null; // или выберите другое значение по умолчанию, в зависимости от ваших требований
     }
 
+    /**
+     * Function to ser staUS Blocked for user with UserID
+     * @param userId
+     * @throws SQLException
+     */
     public static void banUser(int userId) throws SQLException {
         updateUserStatus(userId, DataBase.isAdmin(userId), true);
+        logger.info("user " + DataBase.getLoginByUserId(userId) + " baned");
     }
 
+    /**
+     * Function to ser staus UNblocked for user with UserID
+     * @param userId
+     * @throws SQLException
+     */
     public static void unbanUser(int userId) throws SQLException {
         updateUserStatus(userId, DataBase.isAdmin(userId), false);
+        logger.info("user " + DataBase.getLoginByUserId(userId) + " unbaned");
     }
 
+    /**
+     * Function to ser staUS isAdmin = true for user with UserID
+     * @param userId
+     * @throws SQLException
+     */
     public static void promoteAdmin(int userId) throws SQLException {
         updateUserStatus(userId, true, DataBase.isBlocked(userId));
+        logger.info("user " + DataBase.getLoginByUserId(userId) + " now is Admin");
     }
 
+    /**
+     *  Function to ser staUS isAdmin = FALSE for user with UserID
+     * @param userId
+     * @throws SQLException
+     */
     public static void demoteAdmin(int userId) throws SQLException {
         updateUserStatus(userId, false, DataBase.isBlocked(userId));
+        logger.info("user " + DataBase.getLoginByUserId(userId) + " is not Admin now");
     }
 
+    /**
+     * Function to get a product (Product entity) by productId
+     * @param productId
+     * @return
+     */
     public static Product getProductById(int productId) {
         Product product = null;
         Connection connection = null;
@@ -460,6 +544,13 @@ public class DataBase {
         return product;
     }
 
+    /**
+     * function to update count of product in a User (userid) cart (cartId) to quantity
+     * @param userId
+     * @param cartId
+     * @param quantity
+     * @throws SQLException
+     */
     public static void updateUserCartCol(int userId, int cartId, int quantity) throws SQLException {
         Connection connection = null;
 

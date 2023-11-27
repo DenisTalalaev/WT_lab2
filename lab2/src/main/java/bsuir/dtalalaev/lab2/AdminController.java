@@ -17,7 +17,18 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.List;
 
+
+/**
+class to handle admin actions and load admin pages
+ */
 public class AdminController {
+
+    /**
+     * function to load admin panel
+     * @param servlet
+     * @param req
+     * @param resp
+     */
     public static void loadAdminPanel(HelloServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
         try {
             int userid = Integer.parseInt(((String) req.getSession().getAttribute("userid")));
@@ -36,6 +47,17 @@ public class AdminController {
         }
     }
 
+    /**
+     * function to handle admin action with accounts: ban/unban, promote/demote.
+     * In case user demote himself, he will be redirect to the shop page
+     * @param helloServlet
+     * @param resp
+     * @param req
+     * @param uri
+     * @param lastPathSegment
+     * @throws SQLException
+     * @throws IOException
+     */
     public static void handleAdminAction(HelloServlet helloServlet, HttpServletResponse resp, HttpServletRequest req, String uri, String lastPathSegment) throws SQLException, IOException {
         String pathInfo = req.getPathInfo();
         String[] pathParts = pathInfo.split("/");
@@ -89,6 +111,12 @@ public class AdminController {
         AdminController.loadAdminPanel(helloServlet, req, resp);
     }
 
+    /**
+     * load page with all products and form to add/delete product
+     * @param servlet
+     * @param req
+     * @param resp
+     */
     public static void loadProductsPage(HelloServlet servlet, HttpServletRequest req, HttpServletResponse resp) {
         try {
             int userid = Integer.parseInt(((String) req.getSession().getAttribute("userid")));
@@ -107,6 +135,15 @@ public class AdminController {
         }
     }
 
+    /**
+     * add new product to DB, data took from POST
+     * @param helloServlet
+     * @param request
+     * @param response
+     * @throws SQLException
+     * @throws IOException
+     * @throws ServletException
+     */
     public static void addProduct(HelloServlet helloServlet, HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
         String productName = request.getParameter("productName");
@@ -141,11 +178,26 @@ public class AdminController {
     }
 
 
+    /**
+     * function to delete product from database
+     * @param helloServlet
+     * @param req
+     * @param resp
+     * @throws IOException
+     * @throws SQLException
+     */
     public static void deleteProduct(HelloServlet helloServlet, HttpServletRequest req, HttpServletResponse resp) throws IOException, SQLException {
         DataBase.deleteProduct(Integer.parseInt(req.getParameter("productId")));
         AdminController.loadProductsPage(helloServlet, req, resp);
     }
 
+    /**
+     * laod admin cart page, shows all cart for any User in system
+     * @param servlet
+     * @param resp
+     * @param req
+     * @param userId
+     */
     public static void loadAdminCartPage(HelloServlet servlet, HttpServletResponse resp, HttpServletRequest req, int userId) {
         try {
             List<Cart> usercart = DataBase.getCartItemsByUserId(userId);
@@ -159,6 +211,14 @@ public class AdminController {
         }
     }
 
+    /**
+     * delete some product from USERS cart
+     * @param servlet
+     * @param resp
+     * @param req
+     * @param uri
+     * @throws SQLException
+     */
     public static void deleteCart(HelloServlet servlet, HttpServletResponse resp, HttpServletRequest req, String uri) throws SQLException {
         int cartId = Integer.parseInt(uri.split("/")[uri.split("/").length - 1]);
         int userId = DataBase.getUserIdByCartId(cartId);

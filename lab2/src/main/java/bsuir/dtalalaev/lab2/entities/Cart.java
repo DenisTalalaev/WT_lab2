@@ -1,7 +1,10 @@
 package bsuir.dtalalaev.lab2.entities;
 
 import bsuir.dtalalaev.lab2.dbcontrollers.DataBase;
-
+/**
+Class for Cart entity: cart - one order. An order for one product for any user.
+One user can have some carts
+ */
 public class Cart {
     private int cartId;
     private int userId;

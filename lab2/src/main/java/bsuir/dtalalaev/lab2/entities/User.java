@@ -1,5 +1,9 @@
 package bsuir.dtalalaev.lab2.entities;
 
+/**
+class for user entity
+used to load and save all users to admin panel list
+ */
 public class User {
     private int userId;
     private String userName;
@@ -7,9 +11,6 @@ public class User {
     private boolean isAdmin;
     private boolean isBlocked;
 
-    // Геттеры и сеттеры
-
-    // Конструктор
     public User(int userId, String userName, String userLogin, boolean isAdmin, boolean isBlocked) {
         this.userId = userId;
         this.userName = userName;

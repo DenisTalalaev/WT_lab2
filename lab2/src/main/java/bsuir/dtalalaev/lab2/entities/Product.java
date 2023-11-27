@@ -1,13 +1,21 @@
 package bsuir.dtalalaev.lab2.entities;
+
+import java.util.Arrays;
+
+/**
+Class for Product entity
+Product - entity with name, description, price and image.
+Useed for manipulate products in catalog
+
+ */
 public class Product {
     private int productId;
     private String productName;
     private String productDescription;
     private double productPrice;
-    private byte[] productImage; // Изменили тип на массив байт
+    private byte[] productImage;
     private int productCount;
 
-    // Конструкторы, геттеры и сеттеры
 
     public Product(int productId, String productName, String productDescription,
                    double productPrice, byte[] productImage, int productCount) {
@@ -41,5 +49,16 @@ public class Product {
 
     public int getProductCount() {
         return productCount;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "productId=" + productId +
+                ", productName='" + productName + '\'' +
+                ", productDescription='" + productDescription + '\'' +
+                ", productPrice=" + productPrice +
+                ", productCount=" + productCount +
+                '}';
     }
 }
